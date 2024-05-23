@@ -1,4 +1,4 @@
-﻿using optativolll_introducion.repositorios;
+﻿using optativolll_introducion.repositorios.Factura;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;

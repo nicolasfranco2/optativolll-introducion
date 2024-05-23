@@ -1,4 +1,4 @@
-﻿using optativolll_introducion.repositorios;
+﻿using optativolll_introducion.repositorios.Cliente;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
@@ -33,7 +33,7 @@ namespace optativolll_introducion.services.Logica
             }
         }
 
-        public List<Cliente> listado()
+        public IEnumerable<Cliente> GetAll()
         {
 
             return clienterepo.list();
@@ -66,17 +66,39 @@ namespace optativolll_introducion.services.Logica
 
             return true;
         }
+
         public bool EliminarCliente(int id)
         {
-            var Cliente = clienterepo.GetClienteById(id);
-            if (Cliente == null)
-            {
-                throw new ArgumentException($"No se puede eliminar el cliente con ID {id} porque no existe en la base de datos.");
-            }
-            return clienterepo.Delete(id);
+
+            return id > 0 ? clienterepo.Delete(id) : false;
         }
-        public bool ActualizarCliente(Cliente cliente)
+
+
+
+        /*
+    {
+        var Cliente = clienterepo.GetClienteById(id);
+        if (Cliente == null)
         {
+            throw new ArgumentException($"No se puede eliminar el cliente con ID {id} porque no existe en la base de datos.");
+        }
+        return clienterepo.Delete(id);
+    }
+        */
+        public bool Update(Cliente cliente)
+        {
+            return ValidarDatos(cliente) ? clienterepo.Update(cliente) : throw new Exception("Error en la validacion de datos");
+
+
+        }
+        public Cliente GetClienteById(int id)
+        {
+            return clienterepo.GetClienteById(id);
+        }
+    }
+}
+
+    /*
             // Verificar si el cliente existe antes de actualizarlo
             var clienteExistente = clienterepo.GetClienteById(cliente.Id);
             if (clienteExistente == null)
@@ -92,9 +114,9 @@ namespace optativolll_introducion.services.Logica
 
             // Actualizar el cliente en el repositorio
             return clienterepo.Update(cliente);
-        }
+        
 
-
+/*
         public Cliente GetClienteById(int id)
         {
             // Llamar al método correspondiente del repositorio para obtener el cliente por su ID
@@ -102,4 +124,4 @@ namespace optativolll_introducion.services.Logica
         }
 
     }
-}
+}*/

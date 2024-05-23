@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace optativolll_introducion.repositorios
+namespace optativolll_introducion.repositorios.Cliente
 {
     public class Cliente
     {

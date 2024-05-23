@@ -1,12 +1,12 @@
 ﻿using Npgsql;
-using optativolll_introducion.Conexion;
+using optativolll_introducion.repositorios.Conexiones;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace optativolll_introducion.repositorios
+namespace optativolll_introducion.repositorios.Factura
 {
     public class FacturaRepository
     {
@@ -144,16 +144,16 @@ namespace optativolll_introducion.repositorios
             while (list.Read())
             {
                 factura.Add(new Factura
-                    {
-                        NroFactura = list.GetString(2),
-                        FechaHora = list.GetDateTime(3),
-                        Total = list.GetDecimal(4),
-                        TotalIva5 = list.GetDecimal(5),
-                        TotalIva10 = list.GetDecimal(6),
-                        TotalIva = list.GetDecimal(7),
-                        TotalLetras = list.GetString(8),
-                        Sucursal = list.GetString(9)
-                    });
+                {
+                    NroFactura = list.GetString(2),
+                    FechaHora = list.GetDateTime(3),
+                    Total = list.GetDecimal(4),
+                    TotalIva5 = list.GetDecimal(5),
+                    TotalIva10 = list.GetDecimal(6),
+                    TotalIva = list.GetDecimal(7),
+                    TotalLetras = list.GetString(8),
+                    Sucursal = list.GetString(9)
+                });
 
 
             }

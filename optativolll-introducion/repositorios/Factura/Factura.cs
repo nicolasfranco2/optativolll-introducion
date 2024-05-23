@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace optativolll_introducion.repositorios
+namespace optativolll_introducion.repositorios.Factura
 {
     public class Factura
     {
