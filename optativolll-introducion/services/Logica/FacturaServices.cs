@@ -1,113 +1,57 @@
 ﻿using optativolll_introducion.repositorios.Factura;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.Design;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Net.Http.Headers;
-using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace optativolll_introducion.services.Logica
+public class FacturaService
 {
-    public class FacturaServices
+    private readonly FacturaRepository facturaRepository;
+
+    public FacturaService(string connectionString)
     {
-        private FacturaRepository factura_reopo;
-
-        public FacturaServices(string connectionstring)
-        {
-
-
-            factura_reopo = new FacturaRepository(connectionstring);
-
-
-        }
-
-        public bool Insertar_Factura(Factura factura) {
-            if (ValidarDatos(factura))
-            {
-                return factura_reopo.add(factura);
-            }
-            else
-            {
-                throw new Exception("Error en la validacion de datos");
-            }
-        }
-        public List<Factura> listado()
-        {
-
-            return factura_reopo.list();
-        }
-
-        public bool ValidarDatos(Factura factura)
-        {
-             
-            if (factura == null)
-                return false;
-          
-            if (string.IsNullOrEmpty(factura.NroFactura))
-                return false;
-            if (factura.FechaHora == DateTime.MinValue)
-                return false;
-            if (factura.Total == 0)
-                return false;
-            if (factura.TotalIva5 == 0)
-               return false;
-            if (factura.TotalIva10 == 0)
-                return false;
-            if (factura.TotalIva == 0)
-                return false;
-            if (string.IsNullOrEmpty(factura.TotalLetras))
-                return false;
-            if (string.IsNullOrEmpty(factura.Sucursal))
-                return false;
-           
-
-            return true;
-
-
-        }
-
-    
-
-    public bool EliminaFactura(int id)
-    {
-        var Cliente = factura_reopo.GetFacturaById(id);
-        if (Cliente == null)
-        {
-            throw new ArgumentException($"No se puede eliminar el cliente con ID {id} porque no existe en la base de datos.");
-        }
-        return factura_reopo.Delete(id);
+        facturaRepository = new FacturaRepository(connectionString);
     }
 
-    public bool ActualizarFactura(Factura factura)
+    public void AgregarFactura(Factura factura)
     {
-        // Verificar si el cliente existe antes de actualizarlo
-        var clienteExistente = factura_reopo.GetFacturaById(factura.Id);
-        if (clienteExistente == null)
+        if (factura == null)
         {
-            throw new ArgumentException($"No se puede actualizar el cliente con ID {factura.Id} porque no existe en la base de datos.");
+            throw new ArgumentNullException(nameof(factura), "La factura no puede ser nula.");
         }
 
-        // Validar los datos del cliente
-        if (!ValidarDatos(factura))
+        facturaRepository.AgregarFactura(factura);
+    }
+
+    public void ActualizarFactura(Factura factura)
+    {
+        if (factura == null)
         {
-            throw new ArgumentException("Error en la validación de los datos del cliente.");
+            throw new ArgumentNullException(nameof(factura), "La factura no puede ser nula.");
         }
 
-        // Actualizar el cliente en el repositorio
-        return factura_reopo.Update(factura);
+        facturaRepository.ActualizarFactura(factura);
     }
 
-
-    public Factura GetFacturaById(int id)
+    public void EliminarFactura(int id)
     {
-        // Llamar al método correspondiente del repositorio para obtener el cliente por su ID
-        return factura_reopo.GetFacturaById(id);
+        if (id <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(id), "El ID de la factura debe ser mayor que cero.");
+        }
+
+        facturaRepository.EliminarFactura(id);
     }
 
+    public Factura ObtenerFactura(int id)
+    {
+        if (id <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(id), "El ID de la factura debe ser mayor que cero.");
+        }
+
+        return facturaRepository.ObtenerFactura(id);
+    }
+
+    public List<Factura> ObtenerTodasFacturas()
+    {
+        return facturaRepository.ObtenerTodasFacturas();
+    }
 }
 }
-
-

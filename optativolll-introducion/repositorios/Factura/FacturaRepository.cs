@@ -1,7 +1,9 @@
-﻿using Npgsql;
+﻿using Dapper;
+using Npgsql;
 using optativolll_introducion.repositorios.Conexiones;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,33 +12,22 @@ namespace optativolll_introducion.repositorios.Factura
 {
     public class FacturaRepository
     {
-        NpgsqlConnection connection;
+        private IDbConnection connection;
 
-
-        public FacturaRepository(string coconnectionstring)
+        public FacturaRepository(string connectionString)
         {
-
-            connection = new ConexionBD(coconnectionstring).OpenConnection();
+            connection = new NpgsqlConnection(connectionString);
         }
 
-        public bool add(Factura factura)
+        public void AgregarFactura(Factura factura)
         {
             try
             {
-                var cmd = connection.CreateCommand();
-                cmd.CommandText = "INSERT INTO public.factura (nro_factura, fecha_hora, total, total_iva5, total_iva10, total_iva, total_letras, sucursal) " +
-                    "VALUES (@NroFactura, @FechaHora, @Total, @TotalIva5, @TotalIva10, @TotalIva, @TotalLetras, @Sucursal)";
-                cmd.Parameters.AddWithValue("@NroFactura", factura.NroFactura);
-                cmd.Parameters.AddWithValue("@FechaHora", factura.FechaHora);
-                cmd.Parameters.AddWithValue("@Total", factura.Total);
-                cmd.Parameters.AddWithValue("@TotalIva5", factura.TotalIva5);
-                cmd.Parameters.AddWithValue("@TotalIva10", factura.TotalIva10);
-                cmd.Parameters.AddWithValue("@TotalIva", factura.TotalIva);
-                cmd.Parameters.AddWithValue("@TotalLetras", factura.TotalLetras);
-                cmd.Parameters.AddWithValue("@Sucursal", factura.Sucursal);
-                cmd.ExecuteNonQuery();
-                connection.Close();
-                return true;
+                string sql = "INSERT INTO Factura (IdCliente, NroFactura, FechaHora, Total, " +
+                             "TotalIva5, TotalIva10, TotalIva, TotalLetras, Sucursal) " +
+                             "VALUES (@IdCliente, @NroFactura, @FechaHora, @Total, @TotalIva5, " +
+                             "@TotalIva10, @TotalIva, @TotalLetras, @Sucursal)";
+                connection.Execute(sql, factura);
             }
             catch (Exception ex)
             {
@@ -44,42 +35,15 @@ namespace optativolll_introducion.repositorios.Factura
             }
         }
 
-        public bool Delete(int id)
+        public void ActualizarFactura(Factura factura)
         {
             try
             {
-                using (var cmd = connection.CreateCommand())
-                {
-                    cmd.CommandText = "DELETE FROM cliente WHERE id = @Id";
-                    cmd.Parameters.AddWithValue("@Id", id);
-                    int rowsAffected = cmd.ExecuteNonQuery();
-                    return rowsAffected > 0;
-                }
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
-        }
-        public bool Update(Factura factura)
-        {
-            try
-            {
-                using (var cmd = connection.CreateCommand())
-                {
-                    cmd.CommandText = "UPDATE factura SET nro_factura = @NroFactura, fecha_hora = @FechaHora, total = @Total, total_iva5 = @TotalIva5, total_iva10 = @TotalIva10, total_iva = @TotalIva, total_letras = @TotalLetras, sucursal = @Sucursal WHERE id = @Id";
-                    cmd.Parameters.AddWithValue("@NroFactura", factura.NroFactura);
-                    cmd.Parameters.AddWithValue("@FechaHora", factura.FechaHora);
-                    cmd.Parameters.AddWithValue("@Total", factura.Total);
-                    cmd.Parameters.AddWithValue("@TotalIva5", factura.TotalIva5);
-                    cmd.Parameters.AddWithValue("@TotalIva10", factura.TotalIva10);
-                    cmd.Parameters.AddWithValue("@TotalIva", factura.TotalIva);
-                    cmd.Parameters.AddWithValue("@TotalLetras", factura.TotalLetras);
-                    cmd.Parameters.AddWithValue("@Sucursal", factura.Sucursal);
-                    cmd.Parameters.AddWithValue("@Id", factura.Id);
-                    int rowsAffected = cmd.ExecuteNonQuery();
-                    return rowsAffected > 0; // Devuelve true si se actualizó al menos una fila
-                }
+                string sql = "UPDATE Factura SET IdCliente = @IdCliente, NroFactura = @NroFactura, " +
+                             "FechaHora = @FechaHora, Total = @Total, TotalIva5 = @TotalIva5, " +
+                             "TotalIva10 = @TotalIva10, TotalIva = @TotalIva, TotalLetras = @TotalLetras, " +
+                             "Sucursal = @Sucursal WHERE Id = @Id";
+                connection.Execute(sql, factura);
             }
             catch (Exception ex)
             {
@@ -87,78 +51,43 @@ namespace optativolll_introducion.repositorios.Factura
             }
         }
 
-
-        public Factura GetFacturaById(int id)
+        public void EliminarFactura(int id)
         {
-            Factura factura = null;
-
             try
             {
-                using (var cmd = connection.CreateCommand())
-                {
-                    cmd.CommandText = "SELECT * FROM cliente WHERE id = @Id";
-                    cmd.Parameters.AddWithValue("@Id", id);
-
-                    using (var reader = cmd.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            factura = new Factura
-                            (
-
-                        id: reader.GetInt32(reader.GetOrdinal("Id")),
-                        idCliente: reader.GetInt32(reader.GetOrdinal("IdCliente")),
-                        nroFactura: reader.GetString(reader.GetOrdinal("NroFactura")),
-                        fechaHora: reader.GetDateTime(reader.GetOrdinal("FechaHora")),
-                        total: reader.GetDecimal(reader.GetOrdinal("Total")),
-                        totalIva5: reader.GetDecimal(reader.GetOrdinal("TotalIva5")),
-                        totalIva10: reader.GetDecimal(reader.GetOrdinal("TotalIva10")),
-                        totalIva: reader.GetDecimal(reader.GetOrdinal("TotalIva")),
-                        totalLetras: reader.GetString(reader.GetOrdinal("TotalLetras")),
-                        sucursal: reader.GetString(reader.GetOrdinal("Sucursal"))
-                         );
-                        }
-                    }
-                }
+                string sql = "DELETE FROM Factura WHERE Id = @Id";
+                connection.Execute(sql, new { Id = id });
             }
-
-
             catch (Exception ex)
             {
                 throw ex;
             }
-
-            return factura;
         }
 
-
-
-        public List<Factura> list()
+        public Factura ObtenerFactura(int id)
         {
-
-            List<Factura> factura = new List<Factura>();
-            var cmd = connection.CreateCommand();
-            cmd.CommandText = "select * from factura";
-            var list = cmd.ExecuteReader();
-
-            while (list.Read())
+            try
             {
-                factura.Add(new Factura
-                {
-                    NroFactura = list.GetString(2),
-                    FechaHora = list.GetDateTime(3),
-                    Total = list.GetDecimal(4),
-                    TotalIva5 = list.GetDecimal(5),
-                    TotalIva10 = list.GetDecimal(6),
-                    TotalIva = list.GetDecimal(7),
-                    TotalLetras = list.GetString(8),
-                    Sucursal = list.GetString(9)
-                });
-
-
+                string sql = "SELECT * FROM Factura WHERE Id = @Id";
+                return connection.QueryFirstOrDefault<Factura>(sql, new { Id = id });
             }
-            return factura;
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
 
+        public List<Factura> ObtenerTodasFacturas()
+        {
+            try
+            {
+                string sql = "SELECT * FROM Factura";
+                return connection.Query<Factura>(sql).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
     }
 }
