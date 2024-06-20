@@ -5,12 +5,15 @@ using System.Runtime.CompilerServices;
 using optativolll_introducion.repositorios.Cliente;
 using optativolll_introducion.repositorios.Factura;
 using optativolll_introducion.repositorios.Sucursal;
+using Optativolll_Introduccion.Repositorios.Productos;
 
 string connectionString = "Host=localhost;port=5432;Database=optativo;Username=postgres;Password=steamat10;";
 
 ClienteServices clienteservices = new ClienteServices(connectionString);
 FacturaServices facturaservices = new FacturaServices(connectionString);
 SucursalServices sucursalservices = new SucursalServices(connectionString);
+ProductoServices productoservices = new ProductoServices(connectionString);
+DetalleFacturaServices detalleFacturaServices = new DetalleFacturaServices(connectionString);
 
 Console.WriteLine(" ingrese: \n a - para insertar cliente nuevo  \n b - para listar clientes \n c - para Actualizar clientes " +
     " \n d - para Eliminar clientes \n e - para Insertar Factura nueva \n f - para listar Facturas " +
@@ -387,6 +390,140 @@ if (opcion == "d")
         });
 
 
+    }
+
+    private static void InsertarProducto(ProductoServices productoservices)
+    {
+        Console.WriteLine("Ingrese el nombre del producto:");
+        string nombre = Console.ReadLine();
+
+        Console.WriteLine("Ingrese la descripción del producto:");
+        string descripcion = Console.ReadLine();
+
+        Console.WriteLine("Ingrese el precio del producto:");
+        if (!decimal.TryParse(Console.ReadLine(), out decimal precio))
+        {
+            Console.WriteLine("Formato de precio inválido. Inténtelo nuevamente.");
+            return;
+        }
+
+        Console.WriteLine("Ingrese la cantidad en stock:");
+        if (!int.TryParse(Console.ReadLine(), out int stock))
+        {
+            Console.WriteLine("Formato de cantidad inválido. Inténtelo nuevamente.");
+            return;
+        }
+
+        productoservices.Insertar(new Producto
+        {
+            Nombre = nombre,
+            Descripcion = descripcion,
+            Precio = precio,
+            Stock = stock
+        });
+
+        Console.WriteLine("Producto insertado correctamente.");
+    }
+
+    private static void ListarProductos(ProductoServices productoservices)
+    {
+        var productos = productoservices.GetAll().ToList();
+
+        if (productos.Any())
+        {
+            Console.WriteLine("Listado de productos:");
+            foreach (var producto in productos)
+            {
+                Console.WriteLine($"ID: {producto.Id}");
+                Console.WriteLine($"Nombre: {producto.Nombre}");
+                Console.WriteLine($"Descripción: {producto.Descripcion}");
+                Console.WriteLine($"Precio: {producto.Precio}");
+                Console.WriteLine($"Stock: {producto.Stock}");
+                Console.WriteLine();
+            }
+        }
+        else
+        {
+            Console.WriteLine("No hay productos registrados.");
+        }
+    }
+
+    private static void ActualizarProducto(ProductoServices productoservices)
+    {
+        Console.WriteLine("Ingrese el ID del producto que desea actualizar:");
+        if (!int.TryParse(Console.ReadLine(), out int idProducto))
+        {
+            Console.WriteLine("Formato de ID inválido. Intente nuevamente.");
+            return;
+        }
+
+        try
+        {
+            Producto productoExistente = productoservices.GetProductoById(idProducto);
+
+            if (productoExistente == null)
+            {
+                Console.WriteLine($"No se puede actualizar el producto con ID {idProducto} porque no existe.");
+                return;
+            }
+
+            Console.WriteLine("Ingrese el nombre del producto:");
+            productoExistente.Nombre = Console.ReadLine();
+
+            Console.WriteLine("Ingrese la descripción del producto:");
+            productoExistente.Descripcion = Console.ReadLine();
+
+            Console.WriteLine("Ingrese el precio del producto:");
+            if (!decimal.TryParse(Console.ReadLine(), out decimal precio))
+            {
+                Console.WriteLine("Formato de precio inválido. Inténtelo nuevamente.");
+                return;
+            }
+            productoExistente.Precio = precio;
+
+            Console.WriteLine("Ingrese la cantidad en stock:");
+            if (!int.TryParse(Console.ReadLine(), out int stock))
+            {
+                Console.WriteLine("Formato de cantidad inválido. Inténtelo nuevamente.");
+                return;
+            }
+            productoExistente.Stock = stock;
+
+            bool actualizado = productoservices.Update(productoExistente);
+
+            if (actualizado)
+            {
+                Console.WriteLine("Producto actualizado correctamente.");
+            }
+            else
+            {
+                Console.WriteLine("No se pudo actualizar el producto.");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al intentar actualizar el producto: {ex.Message}");
+        }
+    }
+
+    public  void EliminarProducto(ProductoServices productoservices)
+    {
+        Console.WriteLine("Ingrese el ID del producto que desea eliminar:");
+        if (!int.TryParse(Console.ReadLine(), out int idProducto))
+        {
+            Console.WriteLine("Formato de ID inválido. Intente nuevamente.");
+            return;
+        }
+
+        try
+        {
+            productoservices.EliminarProducto(idProducto);
+            Console.WriteLine("Producto eliminado correctamente.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al intentar eliminar el producto: {ex.Message}");
+        }
     }
 }
 
